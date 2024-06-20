@@ -185,18 +185,6 @@ void load_skfile(char *filename, struct ecc_elgamal_ctx *ctx) {
     }
 }
 
-void mypad_encrypt(uint8_t * key, uint8_t *nonce, uint8_t *X) {
-    for (int i = 0; i < 32; i++) {
-        X[i] = key[i] ^ nonce[i];
-    }
-}
-
-void mypad_decrypt(uint8_t *nonce, uint8_t *X, uint8_t *key) {
-    for (int i = 0; i < 32; i++) {
-        key[i] = X[i] ^ nonce[i];
-    }
-}
-
 int ecc_keygen(struct ecc_elgamal_ctx *ctx) {
     BN_CTX *bnctx = BN_CTX_new();
     BN_CTX_start(bnctx);

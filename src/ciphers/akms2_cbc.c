@@ -171,18 +171,14 @@ void akms2_cbc_encrypt(char *inputfile, char *outputfile, char *pkfile) {
     struct ecc_elgamal_ctx ctx;
     load_pkfile(pkfile, &ctx);
     uint8_t key[32];
-    uint8_t key_padded[32];
-    uint8_t pad_nonce[32];
     urandom(key, 32);
-    urandom(pad_nonce, 32);
     BIGNUM *bn_keyptxt;
     BIGNUM *bn_keyctxt1;
     BIGNUM *bn_keyctxt2;
     bn_keyptxt = BN_new();
     bn_keyctxt1 = BN_new();
     bn_keyctxt2 = BN_new();
-    mypad_encrypt(key, pad_nonce, key_padded);
-    BN_bin2bn(key_padded, 32, bn_keyptxt);
+    BN_bin2bn(key, 32, bn_keyptxt);
     ecceg_encrypt(&ctx, bn_keyctxt1, bn_keyctxt2, bn_keyptxt);
     int ctxt1bytes = BN_num_bytes(bn_keyctxt1);
     int ctxt2bytes = BN_num_bytes(bn_keyctxt2);
@@ -205,7 +201,6 @@ void akms2_cbc_encrypt(char *inputfile, char *outputfile, char *pkfile) {
     FILE *infile, *outfile;
     infile = fopen(inputfile, "rb");
     outfile = fopen(outputfile, "wb");
-    fwrite(pad_nonce, 1, 32, outfile);
     fwrite(ctxt1num, 1, 2, outfile);
     fwrite(keyctxt1, 1, ctxt1bytes, outfile);
     fwrite(ctxt2num, 1, 2, outfile);
@@ -247,8 +242,6 @@ void akms2_cbc_decrypt(char *inputfile, char *outputfile, char *skfile) {
     struct ecc_elgamal_ctx ctx;
     load_skfile(skfile, &ctx);
     uint8_t key[32];
-    uint8_t key_padded[32];
-    uint8_t pad_nonce[32];
 
     struct akms2_state state;
     int blocklen = 16;
@@ -258,7 +251,6 @@ void akms2_cbc_decrypt(char *inputfile, char *outputfile, char *skfile) {
     fseek(infile, 0, SEEK_END);
     uint32_t datalen = ftell(infile);
     fseek(infile, 0, SEEK_SET);
-    fread(pad_nonce, 1, 32, infile);
     char *ctxt1num[2];
     fread(ctxt1num, 1, 2, infile);
     int ctxt1n = atoi(ctxt1num);
@@ -271,7 +263,7 @@ void akms2_cbc_decrypt(char *inputfile, char *outputfile, char *skfile) {
     fread(keyctxt2, 1, ctxt2n, infile);
     fread(iv, 1, blocklen, infile);
     akms2_load_iv(&state, iv);
-    datalen = datalen - blocklen - ctxt1n - ctxt2n - 32 - 32 - 2 - 2;
+    datalen = datalen - blocklen - ctxt1n - ctxt2n - 32 - 2 - 2;
     uint32_t blocks = datalen / blocklen;
     int extra = datalen % blocklen;
     if (extra != 0) {
@@ -287,8 +279,7 @@ void akms2_cbc_decrypt(char *inputfile, char *outputfile, char *skfile) {
     BN_bin2bn(keyctxt1, ctxt1n, bn_keyctxt1);
     BN_bin2bn(keyctxt2, ctxt2n, bn_keyctxt2);
     ecceg_decrypt(&ctx, bn_keyctxt1, bn_keyctxt2, bn_keyptxt);
-    BN_bn2bin(bn_keyptxt, key_padded);
-    mypad_decrypt(key_padded, pad_nonce, key);
+    BN_bn2bin(bn_keyptxt, key);
     fclose(infile);
 
     uint8_t kdf_key[32];
@@ -299,7 +290,7 @@ void akms2_cbc_decrypt(char *inputfile, char *outputfile, char *skfile) {
     }
     infile = fopen(inputfile, "rb");
     outfile = fopen(outputfile, "wb");
-    fseek(infile, (blocklen + ctxt1n + ctxt2n + 2 + 2 + 32), SEEK_SET);
+    fseek(infile, (blocklen + ctxt1n + ctxt2n + 2 + 2), SEEK_SET);
     akms2_ksa(&state, key);
 
     for (uint32_t b = 0; b < blocks; b++) {

@@ -1,1 +1,3 @@
+v0.0.0 - Remove KEM key padding. Ephemeral key is sufficient.
+
 v0.0.0 - Initial demo version with AKMS2, QX HMAC and ECC El Gamal
