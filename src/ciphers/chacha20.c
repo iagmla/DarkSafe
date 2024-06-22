@@ -4,7 +4,9 @@
 /* 512 bit output block */
 /* 20 rounds */
 
-uint32_t chacha_C0[4] = {0x65787061, 0x6e642033, 0x322d6279, 0x7465206b};
+/* Constants from RFC 7539 */
+
+uint32_t chacha_C0[4] = {0x61707865, 0x3320646e, 0x79622d32, 0x6b206574};
 
 struct chacha_state {
     uint32_t S[16];
@@ -76,7 +78,7 @@ void chacha_update(struct chacha_state *state) {
 }
 
 void chacha_keysetup(struct chacha_state *state, uint8_t *key, uint8_t *nonce) {
-    state->rounds = 20;
+    state->rounds = 10;
     state->S[0] = chacha_C0[0];
     state->S[1] = chacha_C0[1];
     state->S[2] = chacha_C0[2];
@@ -91,10 +93,10 @@ void chacha_keysetup(struct chacha_state *state, uint8_t *key, uint8_t *nonce) {
     state->S[11] = ((uint32_t)(key[28]) << 24) + ((uint32_t)key[29] << 16) + ((uint32_t)key[30] << 8) + ((uint32_t)key[31]);
 
     state->S[12] = 0;
-    state->S[13] = 0;
 
-    state->S[14] = ((uint32_t)(nonce[0]) << 24) + ((uint32_t)nonce[1] << 16) + ((uint32_t)nonce[2] << 8) + ((uint32_t)nonce[3]);
-    state->S[15] = ((uint32_t)(nonce[4]) << 24) + ((uint32_t)nonce[5] << 16) + ((uint32_t)nonce[6] << 8) + ((uint32_t)nonce[7]);
+    state->S[13] = ((uint32_t)(nonce[0]) << 24) + ((uint32_t)nonce[1] << 16) + ((uint32_t)nonce[2] << 8) + ((uint32_t)nonce[3]);
+    state->S[14] = ((uint32_t)(nonce[4]) << 24) + ((uint32_t)nonce[5] << 16) + ((uint32_t)nonce[6] << 8) + ((uint32_t)nonce[7]);
+    state->S[15] = ((uint32_t)(nonce[8]) << 24) + ((uint32_t)nonce[9] << 16) + ((uint32_t)nonce[10] << 8) + ((uint32_t)nonce[11]);
 
 }
 
@@ -130,12 +132,12 @@ void chacha_xor_block(struct chacha_state *state, uint8_t *block) {
     block[28] ^= (state->O[7] & 0xFF000000) >> 24;
     block[29] ^= (state->O[7] & 0x00FF0000) >> 16;
     block[30] ^= (state->O[7] & 0x0000FF00) >> 8;
-    block[31] ^= (state->S[7] & 0x000000FF);
+    block[31] ^= (state->O[7] & 0x000000FF);
     block[32] ^= (state->O[8] & 0xFF000000) >> 24;
     block[33] ^= (state->O[8] & 0x00FF0000) >> 16;
     block[34] ^= (state->O[8] & 0x0000FF00) >> 8;
     block[35] ^= (state->O[8] & 0x000000FF);
-    block[36] ^= (state->S[9] & 0xFF000000) >> 24;
+    block[36] ^= (state->O[9] & 0xFF000000) >> 24;
     block[37] ^= (state->O[9] & 0x00FF0000) >> 16;
     block[38] ^= (state->O[9] & 0x0000FF00) >> 8;
     block[39] ^= (state->O[9] & 0x000000FF);
@@ -237,7 +239,7 @@ void chacha_decrypt(char *inputfile, char *outputfile, char *skfile) {
     struct chacha_state state;
     int blocklen = 64;
     int bufsize = 64;
-    uint8_t nonce[8];
+    uint8_t nonce[12];
     FILE *infile, *outfile;
     infile = fopen(inputfile, "rb");
     fseek(infile, 0, SEEK_END);
@@ -253,8 +255,8 @@ void chacha_decrypt(char *inputfile, char *outputfile, char *skfile) {
     int ctxt2n = atoi(ctxt2num);
     uint8_t keyctxt2[ctxt2n];
     fread(keyctxt2, 1, ctxt2n, infile);
-    fread(nonce, 1, 8, infile);
-    datalen = datalen - 8 - ctxt1n - ctxt2n - 32 - 2 - 2;
+    fread(nonce, 1, 12, infile);
+    datalen = datalen - 12 - ctxt1n - ctxt2n - 32 - 2 - 2;
     uint32_t blocks = datalen / blocklen;
     int extra = datalen % blocklen;
     if (extra != 0) {
@@ -281,7 +283,7 @@ void chacha_decrypt(char *inputfile, char *outputfile, char *skfile) {
     }
     infile = fopen(inputfile, "rb");
     outfile = fopen(outputfile, "wb");
-    fseek(infile, (8 + ctxt1n + ctxt2n + 2 + 2), SEEK_SET);
+    fseek(infile, (12 + ctxt1n + ctxt2n + 2 + 2), SEEK_SET);
     chacha_keysetup(&state, key, nonce);
 
     for (uint32_t b = 0; b < blocks; b++) {
