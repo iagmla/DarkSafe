@@ -17,14 +17,14 @@ uint32_t chacha_rotl(uint32_t a, int b) {
 }
 
 void chacha_qtr_rnd(struct chacha_state *state, int a, int b, int c, int d) {
-    state->S[a] += state->S[b];
-    state->S[d] = chacha_rotl(state->S[d] ^ state->S[a], 16);
-    state->S[c] += state->S[d];
-    state->S[b] = chacha_rotl(state->S[b] ^ state->S[c], 12);
-    state->S[a] += state->S[b];
-    state->S[d] = chacha_rotl(state->S[d] ^ state->S[a], 8);
-    state->S[c] += state->S[d];
-    state->S[b] = chacha_rotl(state->S[b] ^ state->S[c], 7);
+    state->O[a] += state->O[b];
+    state->O[d] = chacha_rotl(state->O[d] ^ state->O[a], 16);
+    state->O[c] += state->O[d];
+    state->O[b] = chacha_rotl(state->O[b] ^ state->O[c], 12);
+    state->O[a] += state->O[b];
+    state->O[d] = chacha_rotl(state->O[d] ^ state->O[a], 8);
+    state->O[c] += state->O[d];
+    state->O[b] = chacha_rotl(state->O[b] ^ state->O[c], 7);
 }
 
 void chacha_update(struct chacha_state *state) {
@@ -39,7 +39,6 @@ void chacha_update(struct chacha_state *state) {
         chacha_qtr_rnd(state, 2, 7, 8, 13);
         chacha_qtr_rnd(state, 3, 4, 9, 14);
     }
-    state->S[12] += 1;
 
     state->O[0] += state->S[0];
     state->O[1] += state->S[1];
@@ -57,6 +56,8 @@ void chacha_update(struct chacha_state *state) {
     state->O[13] += state->S[13];
     state->O[14] += state->S[14];
     state->O[15] += state->S[15];
+
+    state->S[12] += 1;
 }
 
 void chacha_keysetup(struct chacha_state *state, uint8_t *key, uint8_t *nonce) {
