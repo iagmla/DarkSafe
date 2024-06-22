@@ -1,4 +1,4 @@
-v0.0.0 - Addition of ChaCha20
+v0.0.0 - Addition of ChaCha20, not working fully
 
 v0.0.0 - Remove KEM key padding. Ephemeral key is sufficient.
 
