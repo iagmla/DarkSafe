@@ -28,7 +28,22 @@ void chacha_qtr_rnd(struct chacha_state *state, int a, int b, int c, int d) {
 }
 
 void chacha_update(struct chacha_state *state) {
-    memcpy(state->O, state->S, 16*sizeof(uint32_t));
+    state->O[0] = state->S[0];
+    state->O[1] = state->S[1];
+    state->O[2] = state->S[2];
+    state->O[3] = state->S[3];
+    state->O[4] = state->S[4];
+    state->O[5] = state->S[5];
+    state->O[6] = state->S[6];
+    state->O[7] = state->S[7];
+    state->O[8] = state->S[8];
+    state->O[9] = state->S[9];
+    state->O[10] = state->S[10];
+    state->O[11] = state->S[11];
+    state->O[12] = state->S[12];
+    state->O[13] = state->S[13];
+    state->O[14] = state->S[14];
+    state->O[15] = state->S[15];
     for (int i = 0; i < state->rounds; i++) {
         chacha_qtr_rnd(state, 0, 4, 8, 12);
         chacha_qtr_rnd(state, 1, 5, 9, 13);
