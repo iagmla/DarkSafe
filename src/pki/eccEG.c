@@ -170,10 +170,11 @@ void load_skfile(char *filename, struct ecc_elgamal_ctx *ctx) {
         FILE *keyfile;
         keyfile = fopen(filename, "rb");
         fread(sknum, 1, sksize, keyfile);
-        unsigned char sk[1536];
-        fread(sk, 1, 65, keyfile);
+        int skn = atoi(sknum);
+        unsigned char sk[skn];
+        fread(sk, 1, skn, keyfile);
         fclose(keyfile);
-        BN_bin2bn(sk, 65, ctx->sk);
+        BN_bin2bn(sk, skn, ctx->sk);
         if ((BN_cmp(ctx->sk, z0) != 0)) {
             good = 1;
         }

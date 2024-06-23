@@ -1,3 +1,5 @@
+v0.0.2 - Fix ecc secret key loading
+
 v0.0.1 - Addition of ChaCha20
 
 v0.0.0 - Remove KEM key padding. Ephemeral key is sufficient.
