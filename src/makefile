@@ -11,4 +11,4 @@ $(KEYGEN): ecceg_keygen.c
 	$(CC) ecceg_keygen.c $(CFLAGS) -o $(KEYGEN)
 
 clean:
-	$(RM) $(KEYGEN) $(RM) $(KEYGEN)
+	$(RM) $(TARGET) $(RM) $(KEYGEN)

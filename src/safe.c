@@ -9,12 +9,13 @@
 #include "hash/qx.c"
 #include "ciphers/akms2_cbc.c"
 #include "ciphers/chacha20.c"
+#include "ciphers/lea_cbc.c"
 
 /* DarkSafe */
 /* by KryptoMagick (Karl Zander) */
 
 void usage() {
-    printf("DarkSafe v0.0.2 - by KryptoMagick\n\n");
+    printf("DarkSafe v0.0.3 - by KryptoMagick\n\n");
     printf("Algorithms:\n***********\nakms2            256 bit\nchacha20         256 bit\n\n");
     printf("Usage:\nsafe <algorithm> -e <input file> <output file> <pk file>\n");
     printf("safe <algorithm> -d <input file> <output file> <sk file>\n");
@@ -56,6 +57,14 @@ int main(int argc, char *argv[]) {
         }
         else if (strcmp(mode, decrypt_symbol) == 0) {
             chacha_decrypt(infile_name, outfile_name, pkfile_name);
+        }
+    }
+    if (strcmp(algorithm, "lea-cbc") == 0) {
+        if (strcmp(mode, encrypt_symbol) == 0) {
+            lea_cbc_encrypt(infile_name, outfile_name, pkfile_name);
+        }
+        else if (strcmp(mode, decrypt_symbol) == 0) {
+            lea_cbc_decrypt(infile_name, outfile_name, pkfile_name);
         }
     }
     printf("\n");
