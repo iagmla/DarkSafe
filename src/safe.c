@@ -9,7 +9,6 @@
 #include "hash/qx.c"
 #include "ciphers/akms2_cbc.c"
 #include "ciphers/chacha20.c"
-#include "ciphers/lea_cbc.c"
 
 /* DarkSafe */
 /* by KryptoMagick (Karl Zander) */
