@@ -16,7 +16,7 @@
 
 void usage() {
     printf("DarkSafe v0.0.5 - by KryptoMagick\n\n");
-    printf("Algorithms:\n***********\nakms2            256 bit\nchacha20         256 bit\n\n");
+    printf("Algorithms:\n***********\naes              256 bit\nakms2            256 bit\nchacha20         256 bit\n\n");
     printf("Usage:\nsafe <algorithm> -e <input file> <output file> <pk file>\n");
     printf("safe <algorithm> -d <input file> <output file> <sk file>\n");
 }
