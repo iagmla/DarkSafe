@@ -1,3 +1,5 @@
+v0.0.5 - Addition of AES (Rijdael) 256 in CBC mode
+
 v0.0.4 - Fix ChaCha20 output byte order
 
 v0.0.2 - Fix ecc secret key loading
