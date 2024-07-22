@@ -4,9 +4,9 @@
 /* 512 bit output block */
 /* 20 rounds */
 
-/* Constants from RFC 7539 */
+/* Constants "expand 32-byte k" */
 
-uint32_t chacha_C0[4] = {0x61707865, 0x3320646e, 0x79622d32, 0x6b206574};
+uint32_t chacha_C0[4] = {0x65787061, 0x6e642033, 0x322d6279, 0x7465206b};
 
 struct chacha_state {
     uint32_t S[16];
@@ -29,7 +29,7 @@ void chacha_qtr_rnd(struct chacha_state *state, int a, int b, int c, int d) {
     state->O[b] = chacha_rotl(state->O[b] ^ state->O[c], 7);
 }
 
-void chacha_update(struct chacha_state *state) {
+void chacha_state_to_out(struct chacha_state *state) {
     state->O[0] = state->S[0];
     state->O[1] = state->S[1];
     state->O[2] = state->S[2];
@@ -46,17 +46,9 @@ void chacha_update(struct chacha_state *state) {
     state->O[13] = state->S[13];
     state->O[14] = state->S[14];
     state->O[15] = state->S[15];
-    for (int i = 0; i < state->rounds; i++) {
-        chacha_qtr_rnd(state, 0, 4, 8, 12);
-        chacha_qtr_rnd(state, 1, 5, 9, 13);
-        chacha_qtr_rnd(state, 2, 6, 10, 14);
-        chacha_qtr_rnd(state, 3, 7, 11, 15);
-        chacha_qtr_rnd(state, 0, 5, 10, 15);
-        chacha_qtr_rnd(state, 1, 6, 11, 12);
-        chacha_qtr_rnd(state, 2, 7, 8, 13);
-        chacha_qtr_rnd(state, 3, 4, 9, 14);
-    }
+}
 
+void chacha_add_state(struct chacha_state *state) {
     state->O[0] += state->S[0];
     state->O[1] += state->S[1];
     state->O[2] += state->S[2];
@@ -73,6 +65,22 @@ void chacha_update(struct chacha_state *state) {
     state->O[13] += state->S[13];
     state->O[14] += state->S[14];
     state->O[15] += state->S[15];
+}
+
+void chacha_update(struct chacha_state *state) {
+    chacha_state_to_out(state);
+    for (int i = 0; i < state->rounds; i++) {
+        chacha_qtr_rnd(state, 0, 4, 8, 12);
+        chacha_qtr_rnd(state, 1, 5, 9, 13);
+        chacha_qtr_rnd(state, 2, 6, 10, 14);
+        chacha_qtr_rnd(state, 3, 7, 11, 15);
+        chacha_qtr_rnd(state, 0, 5, 10, 15);
+        chacha_qtr_rnd(state, 1, 6, 11, 12);
+        chacha_qtr_rnd(state, 2, 7, 8, 13);
+        chacha_qtr_rnd(state, 3, 4, 9, 14);
+    }
+
+    chacha_add_state(state);
 
     state->S[12] += 1;
 }
