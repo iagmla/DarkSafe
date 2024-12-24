@@ -7,7 +7,6 @@
 #include "common/common.c"
 #include "pki/eccEG.c"
 #include "hash/qx.c"
-#include "ciphers/akms2_cbc.c"
 #include "ciphers/chacha20.c"
 #include "ciphers/aes_cbc.c"
 
@@ -15,8 +14,8 @@
 /* by KryptoMagick (Karl Zander) */
 
 void usage() {
-    printf("DarkSafe v0.0.6 - by KryptoMagick\n\n");
-    printf("Algorithms:\n***********\naes              256 bit\nakms2            256 bit\nchacha20         256 bit\n\n");
+    printf("DarkSafe v0.0.7 - by KryptoMagick\n\n");
+    printf("Algorithms:\n***********\naes              256 bit\nchacha20         256 bit\n\n");
     printf("Usage:\nsafe <algorithm> -e <input file> <output file> <pk file>\n");
     printf("safe <algorithm> -d <input file> <output file> <sk file>\n");
 }
@@ -43,15 +42,7 @@ int main(int argc, char *argv[]) {
     file_present(infile_name);
     file_present(pkfile_name);
 
-    if (strcmp(algorithm, "akms2") == 0) {
-        if (strcmp(mode, encrypt_symbol) == 0) {
-            akms2_cbc_encrypt(infile_name, outfile_name, pkfile_name);
-        }
-        else if (strcmp(mode, decrypt_symbol) == 0) {
-            akms2_cbc_decrypt(infile_name, outfile_name, pkfile_name);
-        }
-    }
-    else if (strcmp(algorithm, "chacha20") == 0) {
+    if (strcmp(algorithm, "chacha20") == 0) {
         if (strcmp(mode, encrypt_symbol) == 0) {
             chacha_encrypt(infile_name, outfile_name, pkfile_name);
         }
